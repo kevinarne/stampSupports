@@ -52,16 +52,30 @@ img_width, img_height = img.size
 
 # Scan through bitmap several times, depending on slope of walls
 steps = int(input("How many pixels deep should the layers be?\n"))
+step_inc = 255//steps
+detect_color = (0, 0, 0, 255)
+shift_color = (0, 0, 0, 255 - step_inc)
+print(step_inc)
+print(shift_color)
 for s in range(steps):
     for x in range(img_width):
         for y in range(img_height):
             pix = img.getpixel((x, y))
-            print(pix)
             # Check whether the pixel is black
-            if (pix[3] == 255):
+            if (pix == detect_color):
                 # If black, check whether neighbors are the color of the previous step (white for first iteration)
+                neigh = neighbors(x, y, img_width, img_height)
+                correct_color = False
+                for n in neigh:
+                    if img.getpixel(n) == (0, 0, 0, 0):
+                        correct_color = True
                 # If so, set to the color of the current step
-                print("Found black pixel")
+                if correct_color:
+                    pixels[x,y] = shift_color
+                # Set new target color and shift color
+                detect_color = shift_color
+                shift_color = (0, 0, 0, shift_color[3]-step_inc)
+                print(shift_color)
 
 # Export new bitmap with "sloped" appended
 img.save(filename[:len(filename)-4] + "sloped.png", format="png")
